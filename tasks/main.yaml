@@ -1,0 +1,108 @@
+- name: Ensure systemd-networkd service is enabled and started
+  become: true
+  ansible.builtin.systemd:
+    name: systemd-networkd
+    enabled: true
+    state: started
+    daemon_reload: true
+  when: networkd_enable_service | bool
+
+- name: Ensure systemd-resolved is configured
+  become: true
+  ansible.builtin.systemd:
+    name: systemd-resolved
+    enabled: "{{ networkd_enable_resolved }}"
+    state: started
+    daemon_reload: true
+  when: networkd_enable_resolved | bool
+
+- name: Ensure systemd-networkd directory exists
+  become: true
+  ansible.builtin.file:
+    path: /etc/systemd/network
+    state: directory
+    mode: "0755"
+
+- name: Find existing Netplan configuration
+  become: true
+  ansible.builtin.find:
+    paths: /etc/netplan
+    patterns: "*.yaml"
+    file_type: file
+  register: networkd_netplan_files
+  when: networkd_remove_netplan | bool
+
+- name: Remove existing Netplan configuration
+  become: true
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: absent
+  loop: "{{ networkd_netplan_files.files }}"
+  when:
+    - networkd_remove_netplan | bool
+    - networkd_netplan_files is defined
+
+- name: Generate .link files for physical interfaces
+  become: true
+  ansible.builtin.template:
+    src: link.interface.j2
+    dest: "/etc/systemd/network/10-{{ item.key }}.link"
+    mode: "0644"
+  loop: "{{ networkd_config.links | default({}) | dict2items }}"
+  when: networkd_config.links is defined
+  notify:
+    - Reload systemd-networkd
+    - Trigger udev to apply link file renames
+
+- name: Generate .netdev files for VLANs (required for VLAN= syntax in bridge network file)
+  become: true
+  ansible.builtin.template:
+    src: netdev.vlan.j2
+    dest: "/etc/systemd/network/20-{{ item.key }}.netdev"
+    mode: "0644"
+  loop: "{{ networkd_config.vlans | default({}) | dict2items }}"
+  when: networkd_config.vlans is defined
+  notify: Restart systemd-networkd
+
+- name: Generate .netdev files for bonds
+  become: true
+  ansible.builtin.template:
+    src: netdev.bond.j2
+    dest: "/etc/systemd/network/25-{{ item.key }}.netdev"
+    mode: "0644"
+  loop: "{{ networkd_config.bonds | default({}) | dict2items }}"
+  when: networkd_config.bonds is defined
+  notify: Restart systemd-networkd
+
+- name: Generate .netdev files for bridges
+  become: true
+  ansible.builtin.template:
+    src: netdev.bridge.j2
+    dest: "/etc/systemd/network/30-{{ item.key }}.netdev"
+    mode: "0644"
+  loop: "{{ networkd_config.bridges | default({}) | dict2items }}"
+  when: networkd_config.bridges is defined
+  notify: Restart systemd-networkd
+
+- name: Generate .network files for all interfaces
+  become: true
+  ansible.builtin.template:
+    src: network.interface.j2
+    dest: "/etc/systemd/network/40-{{ item.key }}.network"
+    mode: "0644"
+  loop: "{{ networkd_config.networks | default({}) | dict2items }}"
+  when: networkd_config.networks is defined
+  notify: Restart systemd-networkd
+
+- name: Configure loopback interface
+  become: true
+  ansible.builtin.template:
+    src: network.interface.j2
+    dest: "/etc/systemd/network/50-lo.network"
+    mode: "0644"
+  vars:
+    item:
+      key: lo
+      value: "{{ networkd_config.loopback | default({}) }}"
+  when: networkd_config.loopback is defined
+  notify: Reload systemd-networkd

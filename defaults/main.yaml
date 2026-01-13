@@ -1,0 +1,49 @@
+---
+# systemd-networkd role defaults
+
+# Enable systemd-networkd service
+networkd_enable_service: true
+
+# Enable systemd-resolved service
+networkd_enable_resolved: true
+
+# Remove Netplan configuration files
+networkd_remove_netplan: false
+
+# Network configuration structure
+# This should be defined in host_vars or group_vars
+networkd_config: {}
+
+# Example structure:
+# networkd_config:
+#   links:
+#     internal0:
+#       MACAddress: "a8:b8:e0:0a:21:37"
+#       Name: "internal0"
+#   bonds:
+#     bond0:
+#       Mode: "802.3ad"
+#       LACPTransmitRate: "fast"
+#       MIIMonitorSec: "1s"
+#   vlans:
+#     s3.181:
+#       id: 181
+#       link: internal3
+#   bridges:
+#     t3_users: {}
+#   networks:
+#     internal0:
+#       bridge: t3_users
+#     internal2:
+#       bond: bond0
+#     internal3:
+#       bond: bond0
+#     bond0:
+#       VLAN:
+#         - "bond0.181"
+#     t3_users:
+#       addresses:
+#         - 192.168.1.254/24
+#     isp0:
+#       dhcp4: true
+#       dhcp6: true

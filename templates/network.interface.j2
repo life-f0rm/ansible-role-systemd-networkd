@@ -1,0 +1,152 @@
+{% from "_macros.j2" import bool_to_yesno, is_truthy %}
+[Match]
+{% if item.value.Match is defined %}
+{% for match_key, match_value in item.value.Match.items() %}
+{% if match_key == 'Name' %}
+Name={{ match_value }}
+{% elif match_key == 'MACAddress' %}
+MACAddress={{ match_value }}
+{% elif match_key == 'Type' %}
+Type={{ match_value }}
+{% endif %}
+{% endfor %}
+{% else %}
+Name={{ item.key }}
+{% endif %}
+
+[Network]
+{% if item.value.bridge is defined %}
+Bridge={{ item.value.bridge }}
+{% endif %}
+{% if item.value.Bridge is defined %}
+Bridge={{ item.value.Bridge }}
+{% endif %}
+{% if item.value.bond is defined %}
+Bond={{ item.value.bond }}
+{% endif %}
+{% if item.value.Bond is defined %}
+Bond={{ item.value.Bond }}
+{% endif %}
+{% if item.value.VLAN is defined %}
+{% for vlan in item.value.VLAN %}
+VLAN={{ vlan }}
+{% endfor %}
+{% endif %}
+{% if item.value.vlan is defined %}
+{% for vlan in item.value.vlan %}
+VLAN={{ vlan }}
+{% endfor %}
+{% endif %}
+{% if item.value.dhcp4 is defined %}
+DHCP={{ bool_to_yesno(item.value.dhcp4) }}
+{% endif %}
+{% if item.value.dhcp6 is defined %}
+DHCPv6={{ bool_to_yesno(item.value.dhcp6) }}
+{% endif %}
+{% if item.value.DHCP is defined %}
+DHCP={{ item.value.DHCP | lower }}
+{% endif %}
+{% if item.value.DHCPv4 is defined %}
+[DHCPv4]
+{% if item.value.DHCPv4.UseRoutes is defined %}
+UseRoutes={{ bool_to_yesno(item.value.DHCPv4.UseRoutes) }}
+{% endif %}
+{% if item.value.DHCPv4.UseDNS is defined %}
+UseDNS={{ bool_to_yesno(item.value.DHCPv4.UseDNS) }}
+{% endif %}
+{% if item.value.DHCPv4.RouteMetric is defined %}
+RouteMetric={{ item.value.DHCPv4.RouteMetric }}
+{% endif %}
+{% endif %}
+{% if item.value.addresses is defined %}
+{% for address in item.value.addresses %}
+Address={{ address }}
+{% endfor %}
+{% endif %}
+{% if item.value.Address is defined %}
+{% for address in item.value.Address %}
+Address={{ address }}
+{% endfor %}
+{% endif %}
+{% if item.value.gateway is defined %}
+Gateway={{ item.value.gateway }}
+{% endif %}
+{% if item.value.Gateway is defined %}
+Gateway={{ item.value.Gateway }}
+{% endif %}
+{% if item.value.DNS is defined %}
+{% for dns in item.value.DNS %}
+DNS={{ dns }}
+{% endfor %}
+{% endif %}
+{% if item.value.Domains is defined %}
+{% for domain in item.value.Domains %}
+Domains={{ domain }}
+{% endfor %}
+{% endif %}
+{% if item.value.LinkLocalAddressing is defined %}
+LinkLocalAddressing={{ bool_to_yesno(item.value.LinkLocalAddressing) }}
+{% endif %}
+{% if item.value.IPv6AcceptRA is defined %}
+IPv6AcceptRA={{ bool_to_yesno(item.value.IPv6AcceptRA) }}
+{% endif %}
+{% if item.value.IPv6SendRA is defined %}
+IPv6SendRA={{ bool_to_yesno(item.value.IPv6SendRA) }}
+{% endif %}
+{% if item.value.LLDP is defined %}
+LLDP={{ bool_to_yesno(item.value.LLDP) }}
+{% endif %}
+{% if item.value.EmitLLDP is defined %}
+EmitLLDP={{ bool_to_yesno(item.value.EmitLLDP) }}
+{% endif %}
+{% if item.value.Description is defined %}
+Description={{ item.value.Description }}
+{% endif %}
+{% if item.value.ConfigureWithoutCarrier is defined %}
+ConfigureWithoutCarrier={{ bool_to_yesno(item.value.ConfigureWithoutCarrier) }}
+{% endif %}
+{% if item.value.routes is defined %}
+{% for route in item.value.routes %}
+[Route]
+{% if route.to is defined %}
+Destination={{ route.to }}
+{% elif route.Destination is defined %}
+Destination={{ route.Destination }}
+{% endif %}
+{% if route.via is defined %}
+Gateway={{ route.via }}
+{% elif route.Gateway is defined %}
+Gateway={{ route.Gateway }}
+{% endif %}
+{# OnLink removed for compatibility with older systemd versions #}
+{% endfor %}
+{% endif %}
+{% if item.value.Route is defined %}
+{% for route in item.value.Route %}
+[Route]
+{% if route.Destination is defined %}
+Destination={{ route.Destination }}
+{% endif %}
+{% if route.Gateway is defined %}
+Gateway={{ route.Gateway }}
+{% endif %}
+{# OnLink removed for compatibility with older systemd versions #}
+{% endfor %}
+{% endif %}
+
+{# BridgeVLAN sections for VLAN-aware bridges #}
+{% if item.value.BridgeVLAN is defined %}
+{% for vlan in item.value.BridgeVLAN %}
+[BridgeVLAN]
+{% if vlan.vlan is defined %}
+VLAN={{ vlan.vlan }}
+{% endif %}
+{% if vlan.pvid is defined and vlan.vlan is defined and is_truthy(vlan.pvid) == "true" %}
+PVID={{ vlan.vlan }}
+{% endif %}
+{% if vlan.egress_untagged is defined and vlan.vlan is defined and is_truthy(vlan.egress_untagged) == "true" %}
+EgressUntagged={{ vlan.vlan }}
+{% endif %}
+{% endfor %}
+{% endif %}
+

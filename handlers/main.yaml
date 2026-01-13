@@ -1,0 +1,20 @@
+- name: Restart systemd-networkd
+  become: true
+  ansible.builtin.systemd:
+    name: systemd-networkd
+    state: restarted
+    daemon_reload: true
+
+- name: Reload systemd-networkd
+  become: true
+  ansible.builtin.systemd:
+    name: systemd-networkd
+    state: reloaded
+    daemon_reload: true
+
+- name: Trigger udev to apply link file renames
+  become: true
+  ansible.builtin.systemd:
+    name: systemd-udev-trigger.service
+    state: restarted
+  register: networkd_udev_trigger_result

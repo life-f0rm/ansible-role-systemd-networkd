@@ -1,0 +1,30 @@
+[NetDev]
+Name={{ item.key }}
+Kind=bond
+
+[Bond]
+{% if item.value.Mode is defined %}
+Mode={{ item.value.Mode }}
+{% else %}
+Mode=802.3ad
+{% endif %}
+{% if item.value.MIIMonitorSec is defined %}
+MIIMonitorSec={{ item.value.MIIMonitorSec }}
+{% else %}
+MIIMonitorSec=1s
+{% endif %}
+{% if item.value.LACPTransmitRate is defined %}
+LACPTransmitRate={{ item.value.LACPTransmitRate }}
+{% else %}
+LACPTransmitRate=fast
+{% endif %}
+{% if item.value.TransmitHashPolicy is defined %}
+TransmitHashPolicy={{ item.value.TransmitHashPolicy }}
+{% endif %}
+{% if item.value.UpDelaySec is defined %}
+UpDelaySec={{ item.value.UpDelaySec }}
+{% endif %}
+{% if item.value.DownDelaySec is defined %}
+DownDelaySec={{ item.value.DownDelaySec }}
+{% endif %}
+

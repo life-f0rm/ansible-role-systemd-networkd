@@ -1,0 +1,19 @@
+{% from "_macros.j2" import bool_to_yesno %}
+[NetDev]
+Name={{ item.key }}
+Kind=bridge
+
+[Bridge]
+{% if item.value.vlan_filtering is defined %}
+VLANFiltering={{ bool_to_yesno(item.value.vlan_filtering) }}
+{% endif %}
+{% if item.value.default_pvid is defined %}
+DefaultPVID={{ item.value.default_pvid }}
+{% endif %}
+{% if item.value.stp is defined %}
+STP={{ bool_to_yesno(item.value.stp) }}
+{% endif %}
+{% if item.value.priority is defined %}
+Priority={{ item.value.priority }}
+{% endif %}
+

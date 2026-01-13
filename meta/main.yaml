@@ -1,0 +1,13 @@
+---
+galaxy_info:
+  role_name: networkd
+  author: life-f0rm
+  description: Ansible role to configure systemd-networkd
+  license: MIT
+  min_ansible_version: 2.10.0
+  platforms:
+    - name: Ubuntu
+  galaxy_tags:
+    - networking
+    - systemd
+    - networkd
